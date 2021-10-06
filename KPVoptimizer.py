@@ -4,6 +4,12 @@ from torch.optim import Optimizer
 from torch.optim.optimizer import required
 import numpy as np
 
+import torch
+# from . import _functional as F
+# from torch.optim import Optimizer
+from torch.optim.optimizer import Optimizer, required
+from itertools import tee
+
 class KPV(Optimizer):
 
     def __init__(self, params, lr=required, p=0.001, k=-1.5, var_bounds=[0.0, 1.0], objective='maximize' ):
@@ -14,7 +20,8 @@ class KPV(Optimizer):
             
             
         defaults = dict(lr=lr, k=k, p=p, objective=1.0 if objective=='maximize' else -1.0 )
-        self.thetas = [ torch.rand_like(param) for param in params ]
+        params, params_copy = tee(params, 2)
+        self.thetas = [ torch.rand_like(param) for param in params_copy ]
         self.p = p
         self.k = k
         self.var_bounds = var_bounds
@@ -44,7 +51,6 @@ class KPV(Optimizer):
         for group in self.param_groups:
             params_with_grad = []
             d_p_list = []
-
             lr = group['lr']
             sign = group['objective']
         
@@ -56,12 +62,11 @@ class KPV(Optimizer):
 
             for idx, (param, d_p, theta) in enumerate(zip(params_with_grad, d_p_list, self.thetas)):
                 if self.k != 0 and self.p != 0:
-                    feedback = self.k*( p - theta )
+                    feedback = self.k*( param - theta )
                     theta.add_(param-theta, alpha=lr*self.p)
                     theta.clamp_(self.var_bounds[0], self.var_bounds[1])
-                    
+
                     param.add_(d_p+feedback, alpha=lr)
-                    
                     param.clamp_(self.var_bounds[0], self.var_bounds[1])
                 else:
                     param.add_(d_p, alpha=lr)
@@ -78,7 +83,8 @@ class KPVSimplex(Optimizer):
             
             
         defaults = dict(lr=lr, k=k, p=p, objective=1.0 if objective=='maximize' else -1.0 )
-        self.thetas = [ torch.rand_like(param) for param in params ]
+        params, params_copy = tee(params, 2)
+        self.thetas = [ torch.rand_like(param) for param in params_copy ]
         self.p = p
         self.k = k
         self.var_bounds = var_bounds
@@ -108,7 +114,6 @@ class KPVSimplex(Optimizer):
         for group in self.param_groups:
             params_with_grad = []
             d_p_list = []
-
             lr = group['lr']
             sign = group['objective']
         
@@ -130,7 +135,6 @@ class KPVSimplex(Optimizer):
                     param.add_(d_p, alpha=lr)
                     param.copy_( projsplx(param.data ))
                     # param.clamp_(self.var_bounds[0], self.var_bounds[1])
-
         return loss
 
 def projsplx(y):
