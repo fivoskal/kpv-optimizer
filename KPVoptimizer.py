@@ -32,8 +32,8 @@ class KPV(Optimizer):
         
     def __setstate__(self, state):
         super(KPV, self).__setstate__(state)
-        for group in self.param_groups:
-            group.setdefault()
+        # for group in self.param_groups:
+        #     group.setdefault()
 
     @torch.no_grad()
     def step(self, closure=None):
@@ -90,11 +90,11 @@ class KPVSimplex(Optimizer):
         self.var_bounds = var_bounds
         self.lr = lr
         
-        super(KPV, self).__init__(params, defaults)
+        super(KPVSimplex, self).__init__(params, defaults)
 
         
     def __setstate__(self, state):
-        super(KPV, self).__setstate__(state)
+        super(KPVSimplex, self).__setstate__(state)
         for group in self.param_groups:
             group.setdefault()
 
