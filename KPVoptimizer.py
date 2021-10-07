@@ -142,15 +142,11 @@ def projsplx(y):
     https://arxiv.org/abs/1101.6081"""
     with torch.no_grad():
         s, _ = torch.sort(y)
-        print(s)
         n = len(y) ; flag = False
-        print(n)
         parsum = 0
         tmax = -np.inf
         for idx in range(n-2, -1, -1):
-            print(idx)
             parsum += s[idx+1]
-            print('here')
             tmax = (parsum - 1) / (n - (idx + 1) )
             if tmax >= s[idx]:
                 flag = True ; break
