@@ -12,7 +12,7 @@ from itertools import tee
 
 class KPV(Optimizer):
 
-    def __init__(self, params, lr=required, p=0.001, k=-1.5, var_bounds=[0.0, 1.0], objective='maximize' ):
+    def __init__(self, params, lr=required, p=0.001, k=-1.5, var_bounds=[-torch.inf, torch.inf], objective='minimize' ):
         if lr is not required and lr < 0.0:
             raise ValueError("Invalid learning rate: {}".format(lr))
         if objective not in ['maximize', 'max', 'minimize', 'min']:
